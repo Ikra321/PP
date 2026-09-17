@@ -1,64 +1,61 @@
-import java.util.Scanner;
+import java.io.*;
 
 public class Main {
-    public static void main(String[] args){
-        Scanner scanner = new Scanner(System.in);
-        Taylor findSum = new Taylor();
+    public static void main(String[] args) {
+        InputStreamReader isr = new InputStreamReader(System.in);
+        BufferedReader br = new BufferedReader(isr);
 
-        double x = readX(scanner);
-        int k = readK(scanner);
+        try {
+            System.out.print("Введите размерность квадратной матрицы n: ");
+            String line = br.readLine();
+            int n = Integer.parseInt(line);
 
-        double standardValue = Math.log1p(x);
-        double calculatedValue = findSum.calculateSum(x, k);
-
-        System.out.printf("Ряд Тейлора: %.3f%n", calculatedValue);
-        System.out.printf("Math.log1p:   %.3f%n", standardValue);
-    }
-
-    static double readX(Scanner scanner) {
-        while(true){
-            System.out.print("Введите значение x в промежутке (-1; 1]:");
-            if(scanner.hasNextDouble()){
-                double x = scanner.nextDouble();
-                if (x > -1 && x <= 1){
-                    return x;
+            int[][] matrix = new int[n][n];
+            System.out.println("Введите элементы матрицы:");
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    matrix[i][j] = Integer.parseInt(br.readLine());
                 }
-                System.out.println("Неверное значение x. Введите число из заданного промежутка.");
-                }
-                else{
-                    System.out.println("Неверное значение x. Введите число.");
-                    scanner.next();
-                }
-            }  
+            }
+
+            System.out.println("\nИсходная матрица:");
+            printMatrix(matrix);
+
+            System.out.println("\nЗадание 1:");
+            Task1Norm task1 = new Task1Norm(matrix);
+            System.out.println("Строчная норма матрицы: " + task1.calculateRowNorm());
+
+            System.out.println("\nЗадание 2:");
+            Task2Expansion task2 = new Task2Expansion(matrix);
+            int[][] expandedMatrix = task2.expandMatrix();
+            System.out.println("Расширенная матрица:");
+            printMatrix(expandedMatrix);
+
+            System.out.println("\nЗадание 3:");
+            Task3Symmetry task3 = new Task3Symmetry(matrix);
+            int[][] modifiedMatrix = task3.replaceLocalMinimalWithZero();
+            System.out.println("Матрица после замены локальных минимумов на 0:");
+            printMatrix(modifiedMatrix);
+
+            if (task3.isSymmetric(modifiedMatrix)) {
+                System.out.println("Матрица симметрична относительно главной диагонали.");
+            } else {
+                System.out.println("Матрица не симметрична относительно главной диагонали.");
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println("Не целое число");
+        } catch (IOException e) {
+            System.out.println("Ошибка чтения с клавиатуры");
         }
+    }
 
-    static int readK(Scanner scanner) {
-        while(true){
-            System.out.print("Введите натуральное положительное значение k:");
-            if(scanner.hasNextInt()){
-                int k = scanner.nextInt();
-                if (k >= 1){
-                    return k;
-                }
-                System.out.println("Неверное значение k.");
-                }
-                else{
-                    System.out.println("Неверное значение k. Введите число.");
-                    scanner.next();
-                }
-            }  
+    public static void printMatrix(int[][] matrix) {
+        for (int[] row : matrix) {
+            for (int val : row) {
+                System.out.print(val + "\t");
+            }
+            System.out.println();
         }
     }
-
-class Taylor {
-public double  calculateSum(double x, int k){
-    double sum = 0.0;
-    double epsilon = Math.pow(10, -k);
-    double term = x;
-    for(int number = 1; Math.abs(term) >= epsilon; ++number) {
-        sum += term;
-        term = -term * x * number / (number + 1);
-    }
-    return sum;
-}
 }
